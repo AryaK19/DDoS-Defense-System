@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}CloudServe Pro{% endblock %}</title>
+    <meta name="description" content="CloudServe Pro — Enterprise cloud infrastructure with AI-powered protection">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+    <!-- Network status banner (shown during degradation) -->
+    <div id="status-banner" class="status-banner hidden">
+        <span id="status-icon">⚠️</span>
+        <span id="status-msg">Service is experiencing high latency</span>
+        <span id="status-detail"></span>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="nav-logo">
+                <span class="logo-icon">☁️</span>
+                <span class="logo-text">CloudServe <span class="logo-accent">Pro</span></span>
+            </a>
+            <div class="nav-links">
+                <a href="/" class="nav-link {% if request.path == '/' %}active{% endif %}">Home</a>
+                <a href="/products" class="nav-link {% if request.path == '/products' %}active{% endif %}">Products</a>
+                <a href="/contact" class="nav-link {% if request.path == '/contact' %}active{% endif %}">Contact</a>
+            </div>
+            <div class="nav-status">
+                <span id="health-dot" class="health-dot healthy"></span>
+                <span id="health-text" class="health-text">All Systems Normal</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-brand">
+                <span class="logo-icon">☁️</span> CloudServe Pro
+                <p class="footer-tagline">Enterprise cloud infrastructure, powered by AI.</p>
+            </div>
+            <div class="footer-links">
+                <div class="footer-col">
+                    <h4>Platform</h4>
+                    <a href="/products">Compute</a>
+                    <a href="/products">Storage</a>
+                    <a href="/products">Database</a>
+                </div>
+                <div class="footer-col">
+                    <h4>Company</h4>
+                    <a href="/contact">Contact</a>
+                    <a href="#">Careers</a>
+                    <a href="#">Blog</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 CloudServe Pro. All rights reserved. | AI-Based Self-Healing Defense Demo</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/static/site.js"></script>
+</body>
+
+</html>

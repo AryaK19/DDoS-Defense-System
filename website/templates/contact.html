@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Contact — CloudServe Pro{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <h1 class="page-title">Get in <span class="gradient-text">Touch</span></h1>
+    <p class="page-subtitle">Our team is ready to help you build, deploy, and protect your applications.</p>
+</section>
+
+<section class="contact-section">
+    <div class="contact-form-card">
+        <form id="contact-form" onsubmit="return submitForm(event)">
+            <div class="form-group">
+                <label for="name">Full Name</label>
+                <input type="text" id="name" name="name" placeholder="John Doe" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" placeholder="john@company.com" required>
+            </div>
+            <div class="form-group">
+                <label for="company">Company</label>
+                <input type="text" id="company" name="company" placeholder="Acme Inc.">
+            </div>
+            <div class="form-group">
+                <label for="message">Message</label>
+                <textarea id="message" name="message" rows="4" placeholder="Tell us about your project..."
+                    required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary btn-full" id="submit-btn">
+                Send Message
+            </button>
+            <div id="form-status" class="form-status"></div>
+        </form>
+    </div>
+
+    <div class="contact-info">
+        <div class="info-card">
+            <div class="info-icon">📧</div>
+            <h4>Email</h4>
+            <p>sales@cloudserve.pro</p>
+        </div>
+        <div class="info-card">
+            <div class="info-icon">💬</div>
+            <h4>Live Chat</h4>
+            <p>Available 24/7</p>
+        </div>
+        <div class="info-card">
+            <div class="info-icon">📍</div>
+            <h4>Location</h4>
+            <p>San Francisco, CA</p>
+        </div>
+    </div>
+</section>
+{% endblock %}

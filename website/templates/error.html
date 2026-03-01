@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}{{ code }} — CloudServe Pro{% endblock %}
+
+{% block content %}
+<section class="error-section">
+    <div class="error-card">
+        <div class="error-code">{{ code }}</div>
+        <h1 class="error-title">{{ message }}</h1>
+        <p class="error-desc">
+            {% if code == 503 %}
+            Our servers are experiencing high load due to network congestion.
+            The AI defense system is working to restore normal service.
+            Please try again in a few moments.
+            {% else %}
+            Something went wrong. Please try again later.
+            {% endif %}
+        </p>
+        <div class="error-actions">
+            <a href="/" class="btn btn-primary">Go Home</a>
+            <button class="btn btn-secondary" onclick="location.reload()">Retry</button>
+        </div>
+        <div class="error-status">
+            <span class="health-dot critical"></span>
+            <span>Service Degraded — AI Defense Active</span>
+        </div>
+    </div>
+</section>
+{% endblock %}

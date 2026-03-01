@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Products — CloudServe Pro{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <h1 class="page-title">Our <span class="gradient-text">Products</span></h1>
+    <p class="page-subtitle">Enterprise cloud services designed for performance, security, and reliability.</p>
+</section>
+
+<section class="products-grid">
+    {% for product in products %}
+    <div class="product-card" style="animation-delay: {{ loop.index0 * 0.1 }}s">
+        <div class="product-icon">{{ product.icon }}</div>
+        <h3 class="product-name">{{ product.name }}</h3>
+        <p class="product-desc">{{ product.desc }}</p>
+        <div class="product-footer">
+            <span class="product-price">{{ product.price }}</span>
+            <a href="#" class="btn btn-sm">Learn More →</a>
+        </div>
+    </div>
+    {% endfor %}
+</section>
+
+<section class="cta-section">
+    <div class="cta-card">
+        <h2>Ready to get started?</h2>
+        <p>Deploy your first application in under 5 minutes. No credit card required.</p>
+        <a href="/contact" class="btn btn-primary">Start Free Trial</a>
+    </div>
+</section>
+{% endblock %}

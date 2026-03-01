@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}CloudServe Pro — Enterprise Cloud Infrastructure{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero">
+    <div class="hero-bg-grid"></div>
+    <div class="hero-content">
+        <div class="hero-badge">🚀 AI-Powered Infrastructure</div>
+        <h1 class="hero-title">
+            Cloud Infrastructure<br>
+            <span class="gradient-text">Built for Scale</span>
+        </h1>
+        <p class="hero-subtitle">
+            Deploy, scale, and protect your applications with enterprise-grade
+            cloud services backed by AI-driven self-healing defense.
+        </p>
+        <div class="hero-actions">
+            <a href="/products" class="btn btn-primary">Explore Products</a>
+            <a href="/contact" class="btn btn-secondary">Contact Sales</a>
+        </div>
+        <div class="hero-stats">
+            <div class="stat">
+                <span class="stat-value" id="stat-uptime">99.97%</span>
+                <span class="stat-label">Uptime SLA</span>
+            </div>
+            <div class="stat">
+                <span class="stat-value">12</span>
+                <span class="stat-label">Global Regions</span>
+            </div>
+            <div class="stat">
+                <span class="stat-value" id="stat-latency">~20ms</span>
+                <span class="stat-label">Avg Latency</span>
+            </div>
+            <div class="stat">
+                <span class="stat-value">24/7</span>
+                <span class="stat-label">AI Monitoring</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features">
+    <h2 class="section-title">Why CloudServe Pro?</h2>
+    <div class="features-grid">
+        <div class="feature-card">
+            <div class="feature-icon">🛡️</div>
+            <h3>AI-Powered Defense</h3>
+            <p>Our self-healing system detects and mitigates LDoS attacks in real-time using Random Forest detection and
+                Q-Learning defense agents.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">⚡</div>
+            <h3>Lightning Performance</h3>
+            <p>Globally distributed edge network with sub-20ms latency. Your applications respond instantly, anywhere in
+                the world.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">📊</div>
+            <h3>Real-Time Monitoring</h3>
+            <p>Live dashboards track throughput, latency, and packet loss. Get alerts before your users notice any
+                degradation.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">🔄</div>
+            <h3>Self-Healing Network</h3>
+            <p>MAPE-K control loop automatically detects anomalies, plans responses, and executes mitigations — no human
+                intervention needed.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Live Status Section -->
+<section class="live-section">
+    <h2 class="section-title">Live Platform Status</h2>
+    <div class="live-cards">
+        <div class="live-card">
+            <div class="live-label">Response Time</div>
+            <div class="live-value" id="live-latency">--</div>
+        </div>
+        <div class="live-card">
+            <div class="live-label">Success Rate</div>
+            <div class="live-value" id="live-success">--</div>
+        </div>
+        <div class="live-card">
+            <div class="live-label">Throughput</div>
+            <div class="live-value" id="live-throughput">--</div>
+        </div>
+        <div class="live-card">
+            <div class="live-label">Status</div>
+            <div class="live-value" id="live-status">
+                <span class="health-dot healthy"></span> Operational
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

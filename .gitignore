@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+
+# Virtual environments
+venv/
+ENV/
+.env/
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+
+# Models and data
+models/
+*.pkl
+*.h5
+*.json
+*.csv
+*.db
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# VS Code
+.vscode/
+
+# Test outputs
+*.out
+*.tmp
+
+# Node modules (if any)
+node_modules/
+
+# Dashboard/website static cache
+**/static/__pycache__/
+
+# Ignore cloned repo subfolder
+DDoS-Defense-System/
