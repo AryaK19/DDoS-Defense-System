@@ -139,156 +139,189 @@ const trafficChart = new Chart(chartCtx, {
     }
 });
 
-// ─── Topology Canvas ─────────────────────────────────────
-const topoCanvas = document.getElementById('topology-canvas');
-const topoCtx = topoCanvas.getContext('2d');
+// ─── vis.js Network Topology ─────────────────────────────
+let visNetwork = null;
+let visNodes = null;
+let visEdges = null;
 let topoData = null;
 
-function resizeTopoCanvas() {
-    const wrapper = topoCanvas.parentElement;
-    topoCanvas.width = wrapper.clientWidth;
-    topoCanvas.height = wrapper.clientHeight;
-    if (topoData) drawTopology();
+const NODE_STYLE = {
+    server: { shape: 'icon', icon: { face: 'sans-serif', code: '\u{1F5A5}', size: 50, color: '#60a5fa' }, color: { background: '#1e3a5f', border: '#60a5fa', highlight: { background: '#2d5a8f', border: '#93bbfc' } }, font: { color: '#e2e8f0', size: 13 } },
+    client: { shape: 'icon', icon: { face: 'sans-serif', code: '\u{1F4BB}', size: 45, color: '#34d399' }, color: { background: '#1a3d2e', border: '#34d399', highlight: { background: '#2a5d4e', border: '#6ee7b7' } }, font: { color: '#e2e8f0', size: 13 } },
+    attacker: { shape: 'icon', icon: { face: 'sans-serif', code: '\u{1F47E}', size: 45, color: '#ef4444' }, color: { background: '#4c1d1d', border: '#ef4444', highlight: { background: '#7c2d2d', border: '#fca5a5' } }, font: { color: '#e2e8f0', size: 13 } },
+    switch: { shape: 'icon', icon: { face: 'sans-serif', code: '\u{1F500}', size: 45, color: '#a78bfa' }, color: { background: '#2e1e5e', border: '#a78bfa', highlight: { background: '#4e2e8e', border: '#c4b5fd' } }, font: { color: '#e2e8f0', size: 13 } },
+};
+
+function initTopologyNetwork() {
+    const container = document.getElementById('topology-network');
+    visNodes = new vis.DataSet();
+    visEdges = new vis.DataSet();
+
+    const options = {
+        nodes: {
+            borderWidth: 2,
+            borderWidthSelected: 3,
+            shadow: { enabled: true, color: 'rgba(0,0,0,0.4)', size: 12, x: 0, y: 4 },
+            font: { face: 'Inter, sans-serif', color: '#e2e8f0', size: 13, strokeWidth: 3, strokeColor: 'rgba(10,15,28,0.9)' },
+            scaling: { min: 30, max: 50 },
+        },
+        edges: {
+            width: 2,
+            color: { color: 'rgba(100,255,218,0.25)', highlight: '#64ffda', hover: '#64ffda', opacity: 0.9 },
+            smooth: { enabled: true, type: 'curvedCW', roundness: 0.15 },
+            shadow: { enabled: true, color: 'rgba(0,0,0,0.3)', size: 6 },
+            font: { face: 'JetBrains Mono, monospace', color: '#64748b', size: 11, strokeWidth: 2, strokeColor: 'rgba(10,15,28,0.8)', align: 'top' },
+            arrows: { to: { enabled: false } },
+        },
+        physics: {
+            enabled: true,
+            solver: 'forceAtlas2Based',
+            forceAtlas2Based: {
+                gravitationalConstant: -120,
+                centralGravity: 0.008,
+                springLength: 200,
+                springConstant: 0.04,
+                damping: 0.5,
+                avoidOverlap: 0.8,
+            },
+            stabilization: { iterations: 150, fit: true },
+            maxVelocity: 30,
+            minVelocity: 0.5,
+        },
+        interaction: {
+            hover: true,
+            tooltipDelay: 100,
+            zoomView: true,
+            dragNodes: true,
+            dragView: true,
+        },
+        layout: {
+            improvedLayout: true,
+        },
+    };
+
+    visNetwork = new vis.Network(container, { nodes: visNodes, edges: visEdges }, options);
+
+    // Disable physics after initial stabilization so nodes stay put
+    visNetwork.on('stabilized', () => {
+        visNetwork.setOptions({ physics: { enabled: false } });
+    });
 }
-window.addEventListener('resize', resizeTopoCanvas);
-resizeTopoCanvas();
 
-function drawTopology() {
-    if (!topoData) return;
-    const ctx = topoCtx;
-    const w = topoCanvas.width;
-    const h = topoCanvas.height;
+// Initialize on load
+initTopologyNetwork();
 
-    ctx.clearRect(0, 0, w, h);
+function updateVisTopology(data) {
+    if (!data || !visNodes || !visEdges) return;
+    topoData = data;
 
-    // Node positions (fixed layout)
-    const positions = {};
-    const nodes = topoData.nodes || [];
-    const centerX = w / 2;
-    const centerY = h / 2;
+    const nodes = data.nodes || [];
+    const links = data.links || [];
 
-    nodes.forEach((node, i) => {
-        switch (node.type) {
-            case 'server':
-                positions[node.id] = { x: centerX + 150, y: centerY };
-                break;
-            case 'switch':
-                positions[node.id] = { x: centerX - 30, y: centerY };
-                break;
-            case 'client':
-                positions[node.id] = { x: centerX - 200, y: centerY - 60 + i * 50 };
-                break;
-            case 'attacker':
-                positions[node.id] = { x: centerX - 200, y: centerY + 70 };
-                break;
-            default:
-                positions[node.id] = { x: 100 + i * 100, y: centerY };
-        }
-    });
+    // ---- Update nodes ----
+    const existingNodeIds = new Set(visNodes.getIds());
+    const currentNodeIds = new Set();
 
-    // Draw links
-    const links = topoData.links || [];
-    links.forEach(link => {
-        const from = positions[link.from];
-        const to = positions[link.to];
-        if (!from || !to) return;
-
-        ctx.beginPath();
-        ctx.moveTo(from.x, from.y);
-        ctx.lineTo(to.x, to.y);
-
-        // Color by utilization
-        const util = link.utilization || 0;
-        if (util > 0.8) {
-            ctx.strokeStyle = 'rgba(239, 68, 68, 0.7)';
-            ctx.lineWidth = 3;
-        } else if (util > 0.5) {
-            ctx.strokeStyle = 'rgba(251, 191, 36, 0.5)';
-            ctx.lineWidth = 2;
-        } else {
-            ctx.strokeStyle = 'rgba(100, 255, 218, 0.2)';
-            ctx.lineWidth = 1.5;
-        }
-        ctx.stroke();
-
-        // Utilization label
-        if (util > 0.01) {
-            const mx = (from.x + to.x) / 2;
-            const my = (from.y + to.y) / 2 - 8;
-            ctx.fillStyle = '#64748b';
-            ctx.font = '10px JetBrains Mono';
-            ctx.textAlign = 'center';
-            ctx.fillText(`${(util * 100).toFixed(0)}%`, mx, my);
-        }
-    });
-
-    // Draw nodes
     nodes.forEach(node => {
-        const pos = positions[node.id];
-        if (!pos) return;
-
-        const r = 22;
-
-        // Glow for active nodes
-        if (node.health < 0.5 && node.type !== 'attacker') {
-            ctx.beginPath();
-            ctx.arc(pos.x, pos.y, r + 8, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(239, 68, 68, 0.15)';
-            ctx.fill();
-        }
-
-        // Node circle
-        ctx.beginPath();
-        ctx.arc(pos.x, pos.y, r, 0, Math.PI * 2);
-
-        let color;
-        switch (node.type) {
-            case 'server': color = '#60a5fa'; break;
-            case 'client': color = '#34d399'; break;
-            case 'attacker': color = node.isolated ? '#4b5563' : '#ef4444'; break;
-            case 'switch': color = '#a78bfa'; break;
-            default: color = '#64748b';
-        }
-
-        if (node.isolated) {
-            color = '#4b5563';
-            ctx.setLineDash([4, 4]);
-        }
-
-        ctx.fillStyle = color + '20';
-        ctx.fill();
-        ctx.strokeStyle = color;
-        ctx.lineWidth = 2;
-        ctx.stroke();
-        ctx.setLineDash([]);
-
-        // Icon
-        ctx.fillStyle = color;
-        ctx.font = '14px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        const icons = { server: '🖥', client: '💻', attacker: '👾', switch: '🔀' };
-        ctx.fillText(icons[node.type] || '●', pos.x, pos.y);
-
-        // Label
-        ctx.fillStyle = '#e2e8f0';
-        ctx.font = '11px Inter';
-        ctx.fillText(node.id, pos.x, pos.y + r + 14);
-
-        // Health bar under node
-        const barW = 40;
-        const barH = 3;
-        const barX = pos.x - barW / 2;
-        const barY = pos.y + r + 22;
-        ctx.fillStyle = 'rgba(255,255,255,0.05)';
-        ctx.fillRect(barX, barY, barW, barH);
-
+        currentNodeIds.add(node.id);
+        const style = NODE_STYLE[node.type] || NODE_STYLE.switch;
         const health = node.health || 0;
-        const hColor = health > 0.7 ? '#34d399' : health > 0.3 ? '#fbbf24' : '#ef4444';
-        ctx.fillStyle = hColor;
-        ctx.fillRect(barX, barY, barW * health, barH);
+        const isIsolated = node.isolated || false;
+        const isThrottled = node.rate_limited || false;
+
+        let label = `${node.id}\n${node.ip}`;
+        if (isIsolated) label += '\n⛔ ISOLATED';
+        if (isThrottled) label += '\n🔽 THROTTLED';
+
+        // Build tooltip (plain text — vis.js doesn't render HTML in title)
+        const healthPct = (health * 100).toFixed(0);
+        let title = `${node.id} (${node.type})\nIP: ${node.ip}\nHealth: ${healthPct}%`;
+        if (isIsolated) title += '\n⛔ Isolated';
+        if (isThrottled) title += '\n🔽 Rate Limited';
+
+        let nodeColor, iconColor, borderDashes;
+        if (isIsolated) {
+            nodeColor = { background: '#1f2937', border: '#4b5563', highlight: { background: '#374151', border: '#6b7280' } };
+            iconColor = '#6b7280';
+            borderDashes = [6, 4];
+        } else {
+            nodeColor = style.color;
+            iconColor = style.icon.color;
+            borderDashes = false;
+        }
+
+        const nodeData = {
+            id: node.id,
+            label: label,
+            title: title,
+            color: nodeColor,
+            icon: { ...style.icon, color: iconColor },
+            shape: style.shape,
+            font: { ...style.font, color: isIsolated ? '#6b7280' : '#e2e8f0' },
+            shapeProperties: { borderDashes: borderDashes },
+            borderWidth: isIsolated ? 1 : 2,
+        };
+
+        if (existingNodeIds.has(node.id)) {
+            visNodes.update(nodeData);
+        } else {
+            visNodes.add(nodeData);
+        }
+    });
+
+    // Remove stale nodes
+    existingNodeIds.forEach(id => {
+        if (!currentNodeIds.has(id)) visNodes.remove(id);
+    });
+
+    // ---- Update edges ----
+    const existingEdgeIds = new Set(visEdges.getIds());
+    const currentEdgeIds = new Set();
+
+    links.forEach(link => {
+        const edgeId = `${link.from}-${link.to}`;
+        currentEdgeIds.add(edgeId);
+
+        const util = link.utilization || 0;
+        let edgeColor, edgeWidth;
+        if (util > 0.8) {
+            edgeColor = { color: 'rgba(239,68,68,0.8)', highlight: '#ef4444', hover: '#ef4444' };
+            edgeWidth = 4;
+        } else if (util > 0.5) {
+            edgeColor = { color: 'rgba(251,191,36,0.6)', highlight: '#fbbf24', hover: '#fbbf24' };
+            edgeWidth = 3;
+        } else if (util > 0.1) {
+            edgeColor = { color: 'rgba(100,255,218,0.35)', highlight: '#64ffda', hover: '#64ffda' };
+            edgeWidth = 2;
+        } else {
+            edgeColor = { color: 'rgba(100,255,218,0.15)', highlight: '#64ffda', hover: '#64ffda' };
+            edgeWidth = 1.5;
+        }
+
+        const utilLabel = util > 0.01 ? `${(util * 100).toFixed(0)}%` : '';
+
+        const edgeData = {
+            id: edgeId,
+            from: link.from,
+            to: link.to,
+            width: edgeWidth,
+            color: edgeColor,
+            label: utilLabel,
+        };
+
+        if (existingEdgeIds.has(edgeId)) {
+            visEdges.update(edgeData);
+        } else {
+            visEdges.add(edgeData);
+        }
+    });
+
+    // Remove stale edges
+    existingEdgeIds.forEach(id => {
+        if (!currentEdgeIds.has(id)) visEdges.remove(id);
     });
 }
+
 
 // ─── Update Functions ────────────────────────────────────
 
@@ -418,7 +451,7 @@ function addChartPoint(label, throughput, loss, latency) {
 
 function updateTopology(data) {
     topoData = data;
-    drawTopology();
+    updateVisTopology(data);
     updateNodeCards(data.nodes || []);
 }
 
@@ -560,12 +593,15 @@ function resetSimulation() {
             trafficChart.data.datasets.forEach(ds => ds.data = []);
             trafficChart.update();
 
-            // Clear node cards so they rebuild fresh
+            // Clear vis.js topology and node cards
+            if (visNodes) visNodes.clear();
+            if (visEdges) visEdges.clear();
             document.getElementById('node-cards').innerHTML = '';
 
             addLog('system', 'Simulation reset');
         });
 }
+
 
 // ─── Event Log ───────────────────────────────────────────
 

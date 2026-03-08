@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,168 +9,173 @@
     <link rel="stylesheet" href="/static/style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script src="https://unpkg.com/vis-network@9.1.6/standalone/umd/vis-network.min.js"></script>
 </head>
+
 <body>
 
-<!-- ═══ Header ═══ -->
-<header class="header">
-    <div class="header-left">
-        <div class="logo">🛡️</div>
-        <h1>Self-Healing <span>LDoS Defense</span></h1>
-    </div>
-    <div class="header-right">
-        <div class="sim-time" id="sim-time">T+0.0s</div>
-        <div class="status-badge" id="system-status">
-            <span class="status-dot"></span>
-            <span id="status-text">Monitoring</span>
+    <!-- ═══ Header ═══ -->
+    <header class="header">
+        <div class="header-left">
+            <div class="logo">🛡️</div>
+            <h1>Self-Healing <span>LDoS Defense</span></h1>
         </div>
-    </div>
-</header>
+        <div class="header-right">
+            <div class="sim-time" id="sim-time">T+0.0s</div>
+            <div class="status-badge" id="system-status">
+                <span class="status-dot"></span>
+                <span id="status-text">Monitoring</span>
+            </div>
+        </div>
+    </header>
 
-<!-- ═══ Dashboard Grid ═══ -->
-<main class="dashboard">
+    <!-- ═══ Dashboard Grid ═══ -->
+    <main class="dashboard">
 
-    <!-- ─── KPI Row ─── -->
-    <section class="kpi-row">
-        <div class="kpi-card" id="kpi-throughput">
-            <div class="kpi-label">Throughput</div>
-            <div class="kpi-value" id="val-throughput">0.0<span class="kpi-unit">Mbps</span></div>
-        </div>
-        <div class="kpi-card" id="kpi-latency">
-            <div class="kpi-label">Latency</div>
-            <div class="kpi-value" id="val-latency">0.0<span class="kpi-unit">ms</span></div>
-        </div>
-        <div class="kpi-card" id="kpi-loss">
-            <div class="kpi-label">Packet Loss</div>
-            <div class="kpi-value" id="val-loss">0.0<span class="kpi-unit">%</span></div>
-        </div>
-        <div class="kpi-card" id="kpi-detection">
-            <div class="kpi-label">Threat Level</div>
-            <div class="kpi-value" id="val-detection">None</div>
-        </div>
-        <div class="kpi-card" id="kpi-action">
-            <div class="kpi-label">AI Action</div>
-            <div class="kpi-value" id="val-action" style="font-size:16px">—</div>
-        </div>
-    </section>
+        <!-- ─── KPI Row ─── -->
+        <section class="kpi-row">
+            <div class="kpi-card" id="kpi-throughput">
+                <div class="kpi-label">Throughput</div>
+                <div class="kpi-value" id="val-throughput">0.0<span class="kpi-unit">Mbps</span></div>
+            </div>
+            <div class="kpi-card" id="kpi-latency">
+                <div class="kpi-label">Latency</div>
+                <div class="kpi-value" id="val-latency">0.0<span class="kpi-unit">ms</span></div>
+            </div>
+            <div class="kpi-card" id="kpi-loss">
+                <div class="kpi-label">Packet Loss</div>
+                <div class="kpi-value" id="val-loss">0.0<span class="kpi-unit">%</span></div>
+            </div>
+            <div class="kpi-card" id="kpi-detection">
+                <div class="kpi-label">Threat Level</div>
+                <div class="kpi-value" id="val-detection">None</div>
+            </div>
+            <div class="kpi-card" id="kpi-action">
+                <div class="kpi-label">AI Action</div>
+                <div class="kpi-value" id="val-action" style="font-size:16px">—</div>
+            </div>
+        </section>
 
-    <!-- ─── MAPE-K Phase Indicator + Traffic Chart ─── -->
-    <section class="card chart-area">
-        <div class="card-header">
-            <div class="card-title"><span class="icon">📊</span> Live Traffic Monitor</div>
-        </div>
-        <!-- Phase bar -->
-        <div class="phase-labels">
-            <span class="phase-label" id="ph-sense">Sense</span>
-            <span class="phase-label" id="ph-hypothesize">Hypothesize</span>
-            <span class="phase-label" id="ph-act">Act</span>
-            <span class="phase-label" id="ph-verify">Verify</span>
-        </div>
-        <div class="phase-indicator">
-            <div class="phase-step" id="phase-1"></div>
-            <div class="phase-step" id="phase-2"></div>
-            <div class="phase-step" id="phase-3"></div>
-            <div class="phase-step" id="phase-4"></div>
-        </div>
-        <div class="chart-container">
-            <canvas id="traffic-chart"></canvas>
-        </div>
-    </section>
-
-    <!-- ─── Control Panel (Sidebar) ─── -->
-    <aside class="control-panel">
-        <!-- Attack Controls -->
-        <div class="card">
+        <!-- ─── MAPE-K Phase Indicator + Traffic Chart ─── -->
+        <section class="card chart-area">
             <div class="card-header">
-                <div class="card-title"><span class="icon">⚡</span> Attack Controls</div>
+                <div class="card-title"><span class="icon">📊</span> Live Traffic Monitor</div>
             </div>
-            <button class="btn btn-attack" id="btn-start-attack" onclick="startAttack()">
-                🔴 Launch LDoS Attack
-            </button>
-            <button class="btn btn-stop" id="btn-stop-attack" onclick="stopAttack()" style="margin-top:8px; display:none">
-                ⏹ Stop Attack
-            </button>
-            <div class="params-group">
-                <div class="param-row">
-                    <span class="param-label">Burst Rate (Mbps)</span>
-                    <input type="number" class="param-input" id="param-burst-rate" value="50" min="1" max="1000">
-                </div>
-                <div class="param-row">
-                    <span class="param-label">Burst Length (ms)</span>
-                    <input type="number" class="param-input" id="param-burst-len" value="30" min="1" max="500">
-                </div>
-                <div class="param-row">
-                    <span class="param-label">Period (ms)</span>
-                    <input type="number" class="param-input" id="param-period" value="800" min="100" max="5000">
-                </div>
+            <!-- Phase bar -->
+            <div class="phase-labels">
+                <span class="phase-label" id="ph-sense">Sense</span>
+                <span class="phase-label" id="ph-hypothesize">Hypothesize</span>
+                <span class="phase-label" id="ph-act">Act</span>
+                <span class="phase-label" id="ph-verify">Verify</span>
             </div>
-        </div>
+            <div class="phase-indicator">
+                <div class="phase-step" id="phase-1"></div>
+                <div class="phase-step" id="phase-2"></div>
+                <div class="phase-step" id="phase-3"></div>
+                <div class="phase-step" id="phase-4"></div>
+            </div>
+            <div class="chart-container">
+                <canvas id="traffic-chart"></canvas>
+            </div>
+        </section>
 
-        <!-- Defense Controls -->
-        <div class="card">
+        <!-- ─── Control Panel (Sidebar) ─── -->
+        <aside class="control-panel">
+            <!-- Attack Controls -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title"><span class="icon">⚡</span> Attack Controls</div>
+                </div>
+                <button class="btn btn-attack" id="btn-start-attack" onclick="startAttack()">
+                    🔴 Launch LDoS Attack
+                </button>
+                <button class="btn btn-stop" id="btn-stop-attack" onclick="stopAttack()"
+                    style="margin-top:8px; display:none">
+                    ⏹ Stop Attack
+                </button>
+                <div class="params-group">
+                    <div class="param-row">
+                        <span class="param-label">Burst Rate (Mbps)</span>
+                        <input type="number" class="param-input" id="param-burst-rate" value="50" min="1" max="1000">
+                    </div>
+                    <div class="param-row">
+                        <span class="param-label">Burst Length (ms)</span>
+                        <input type="number" class="param-input" id="param-burst-len" value="30" min="1" max="500">
+                    </div>
+                    <div class="param-row">
+                        <span class="param-label">Period (ms)</span>
+                        <input type="number" class="param-input" id="param-period" value="800" min="100" max="5000">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Defense Controls -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title"><span class="icon">🤖</span> AI Defense</div>
+                </div>
+                <button class="btn btn-defense" id="btn-toggle-defense" onclick="toggleDefense()">
+                    ✅ Defense Enabled
+                </button>
+                <div style="margin-top:12px">
+                    <div class="card-title" style="margin-bottom:8px; font-size:12px">Manual Actions</div>
+                    <button class="btn btn-reset" onclick="manualAction('rate_limit')"
+                        style="margin-bottom:6px; font-size:12px">
+                        🔽 Rate Limit Attacker
+                    </button>
+                    <button class="btn btn-reset" onclick="manualAction('drop_source')"
+                        style="margin-bottom:6px; font-size:12px">
+                        🚫 Block Attacker
+                    </button>
+                    <button class="btn btn-reset" onclick="manualAction('restore_node')"
+                        style="margin-bottom:6px; font-size:12px">
+                        ♻️ Restore All Nodes
+                    </button>
+                </div>
+            </div>
+
+            <!-- Node Health -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title"><span class="icon">🖥️</span> Node Health</div>
+                </div>
+                <div class="node-cards" id="node-cards">
+                    <!-- Filled dynamically -->
+                </div>
+            </div>
+
+            <!-- Reset -->
+            <button class="btn btn-reset" onclick="resetSimulation()">
+                🔄 Reset Simulation
+            </button>
+        </aside>
+
+        <!-- ─── Network Topology ─── -->
+        <section class="card topology-area">
             <div class="card-header">
-                <div class="card-title"><span class="icon">🤖</span> AI Defense</div>
+                <div class="card-title"><span class="icon">🌐</span> Network Topology</div>
             </div>
-            <button class="btn btn-defense" id="btn-toggle-defense" onclick="toggleDefense()">
-                ✅ Defense Enabled
-            </button>
-            <div style="margin-top:12px">
-                <div class="card-title" style="margin-bottom:8px; font-size:12px">Manual Actions</div>
-                <button class="btn btn-reset" onclick="manualAction('rate_limit')" style="margin-bottom:6px; font-size:12px">
-                    🔽 Rate Limit Attacker
-                </button>
-                <button class="btn btn-reset" onclick="manualAction('drop_source')" style="margin-bottom:6px; font-size:12px">
-                    🚫 Block Attacker
-                </button>
-                <button class="btn btn-reset" onclick="manualAction('restore_node')" style="margin-bottom:6px; font-size:12px">
-                    ♻️ Restore All Nodes
-                </button>
-            </div>
-        </div>
+            <div class="topology-container" id="topology-network"></div>
+        </section>
 
-        <!-- Node Health -->
-        <div class="card">
+        <!-- ─── Event Log ─── -->
+        <section class="card event-log">
             <div class="card-header">
-                <div class="card-title"><span class="icon">🖥️</span> Node Health</div>
+                <div class="card-title"><span class="icon">📋</span> Event Log</div>
+                <span style="font-size:12px; color:var(--text-muted)" id="log-count">0 events</span>
             </div>
-            <div class="node-cards" id="node-cards">
-                <!-- Filled dynamically -->
+            <div class="log-entries" id="log-entries">
+                <div class="log-entry">
+                    <span class="log-time">0.0s</span>
+                    <span class="log-type system">system</span>
+                    <span class="log-msg">Dashboard initialized. Waiting for simulation...</span>
+                </div>
             </div>
-        </div>
+        </section>
 
-        <!-- Reset -->
-        <button class="btn btn-reset" onclick="resetSimulation()">
-            🔄 Reset Simulation
-        </button>
-    </aside>
+    </main>
 
-    <!-- ─── Network Topology ─── -->
-    <section class="card topology-area">
-        <div class="card-header">
-            <div class="card-title"><span class="icon">🌐</span> Network Topology</div>
-        </div>
-        <div class="topology-canvas-wrapper">
-            <canvas id="topology-canvas"></canvas>
-        </div>
-    </section>
-
-    <!-- ─── Event Log ─── -->
-    <section class="card event-log">
-        <div class="card-header">
-            <div class="card-title"><span class="icon">📋</span> Event Log</div>
-            <span style="font-size:12px; color:var(--text-muted)" id="log-count">0 events</span>
-        </div>
-        <div class="log-entries" id="log-entries">
-            <div class="log-entry">
-                <span class="log-time">0.0s</span>
-                <span class="log-type system">system</span>
-                <span class="log-msg">Dashboard initialized. Waiting for simulation...</span>
-            </div>
-        </div>
-    </section>
-
-</main>
-
-<script src="/static/dashboard.js"></script>
+    <script src="/static/dashboard.js"></script>
 </body>
+
 </html>

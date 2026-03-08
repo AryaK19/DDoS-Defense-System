@@ -38,7 +38,9 @@
 }
 
 /* ─── Reset & Base ───────────────────────────────────── */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -145,8 +147,15 @@ body::before {
 }
 
 @keyframes pulse-dot {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.4;
+    }
 }
 
 .sim-time {
@@ -302,18 +311,19 @@ body::before {
     grid-column: 1 / 3;
 }
 
-.topology-canvas-wrapper {
+.topology-container {
     position: relative;
-    height: 250px;
+    height: 450px;
     width: 100%;
-    background: rgba(0, 0, 0, 0.2);
+    background: rgba(0, 0, 0, 0.25);
     border-radius: var(--radius-sm);
     overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.04);
 }
 
-#topology-canvas {
-    width: 100%;
-    height: 100%;
+/* vis.js overrides for dark theme */
+.topology-container .vis-network {
+    outline: none !important;
 }
 
 /* ─── Control Panel (Sidebar) ────────────────────────── */
@@ -395,8 +405,15 @@ body::before {
 }
 
 @keyframes pulse-btn {
-    0%, 100% { box-shadow: 0 4px 14px rgba(239, 68, 68, 0.3); }
-    50% { box-shadow: 0 4px 25px rgba(239, 68, 68, 0.6); }
+
+    0%,
+    100% {
+        box-shadow: 0 4px 14px rgba(239, 68, 68, 0.3);
+    }
+
+    50% {
+        box-shadow: 0 4px 25px rgba(239, 68, 68, 0.6);
+    }
 }
 
 /* Attack params */
@@ -548,8 +565,15 @@ body::before {
 }
 
 @keyframes pulse-border {
-    0%, 100% { border-color: rgba(239, 68, 68, 0.3); }
-    50% { border-color: rgba(239, 68, 68, 0.7); }
+
+    0%,
+    100% {
+        border-color: rgba(239, 68, 68, 0.3);
+    }
+
+    50% {
+        border-color: rgba(239, 68, 68, 0.7);
+    }
 }
 
 .node-name {
@@ -659,12 +683,14 @@ body::before {
         grid-template-columns: 1fr 1fr;
         padding: 16px;
     }
+
     .control-panel {
         grid-column: 1 / -1;
         grid-row: auto;
         flex-direction: row;
         flex-wrap: wrap;
     }
+
     .kpi-row {
         grid-template-columns: repeat(3, 1fr);
     }
@@ -674,10 +700,14 @@ body::before {
     .dashboard {
         grid-template-columns: 1fr;
     }
+
     .kpi-row {
         grid-template-columns: repeat(2, 1fr);
     }
-    .chart-area, .topology-area, .event-log {
+
+    .chart-area,
+    .topology-area,
+    .event-log {
         grid-column: 1;
     }
 }
