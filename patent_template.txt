@@ -1,0 +1,128 @@
+Following information is required for drafting of patent application.
+
+Full name, nationality and address of applicant(s):
+
+Full Name
+Nationality
+Address
+Vishwakarma Institute of Technology
+
+Indian
+666, Upper Indiranagar, Bibwewadi, Pune, Maharashtra, India – 411 037
+
+
+
+Full name (including middle name), nationality, address (VIT/VIIT address), mail id, 	and phone number of inventor(s):
+
+Full Name (Including middle name) (Min. two faculty names) 
+Nationality
+VIT/VIIT Address (Start with full dept. name followed by full institute name) (For ex.)
+Mail ID
+Phone No.
+Arya Jalindar Kadam
+IN
+Department of Information Technology, Vishwakarma Institute of Technology, Pune
+arya.22210766@viit.ac.in
+8779831758
+Tejaswini Jaywant Durge
+IN
+Department of Information Technology, Vishwakarma Institute of Technology, Pune
+tejaswini.22210270@viit.ac.in
+84465 28408
+Soham Atul Deshmukh
+IN
+Department of Information Technology, Vishwakarma Institute of Technology, Pune
+soham.22211060@viit.ac.in
+
+
+Ajay Rajendra Arak
+IN
+Department of Information Technology, Vishwakarma Institute of Technology, Pune
+ajay.22320094@viit.ac.in
+
+
+Dr. Riddhi R. Mirajkar
+IN
+Department of Information Technology, Vishwakarma Institute of Technology, Pune
+riddhi.mirajkar@viit.ac.in
+
+
+
+
+IN
+Department of Information Technology, Vishwakarma Institute of Technology, Pune
+
+
+
+
+
+
+
+Title of the invention:
+
+It must describe your invention in one sentence. (Not more than 15 words)
+
+
+Technical field of the invention:
+
+Ex. which streams of science or technology your invention is related to.
+Prior art:
+
+	What is the existing technology available in the field relating to your invention and 	disadvantages in that technology which are overcome by your invention. You can take 	the applications found in prior art search and mention how your invention is 	advantageous than the mentioned application.
+
+	Object: 
+		
+		Reason and advantages of your invention over existing technology
+
+
+	Synopsis: 
+
+	Brief summary of your invention (if it is a device what the device is? Components 	required for construction of the device. How the components are assembled for 	construction of the device)
+
+	Brief description of drawings (if any):
+
+	If any figures are given to describe the invention only numerals must be used on it and 	what numerals denote  must be described here. (As per new amendment in patent law, 	please use common single numerals for denoting any specific component in every figure)
+
+         (Example)
+
+Figure 1 illustrates basic diagram of proposed invention. Whereas, 
+100 denotes top surface, 
+101 denotes ratchet hinge mechanism, 
+102 denotes upper hollow shaft, 
+103 denotes vertical locking mechanism, 
+104 denotes lower hollow shaft, 
+105 denotes base part, 
+106 denotes legs of base,
+
+	Detail description of the invention:
+
+Describe in detail about the invention under this heading including any 	experimentation work carried out or validation study.
+
+	Best method of performance of the invention:
+
+Preferably in one to two paragraphs mention the process in which invention is performed 	by giving example. (Actual practical working steps of your invention)
+
+CLAIMS:
+
+Mention specific features of your invention which you need to protect.
+	Inventive step of your invention:
+ 
+	Highlight what are the innovative features of your invention which makes your 	invention different than present technology. (For patentability, your invention must 	achieve either 	technical advantage over existing technology or it must reduce the cost 	of existing technology. Mention HOW this advantage is achieved by your invention)
+
+	Industrial application:
+  	
+In which field or purpose your invention is useful?
+
+	Abstract:
+
+Basic idea about your invention in one paragraph
+
+Drawing
+
+	Drawings must not be labeled anywhere. Only numbers must be used to denote any 		part and what the numbers denote is to be mentioned in brief description of drawings.
+
+
+(Example)
+
+               
+                  Figure 1
