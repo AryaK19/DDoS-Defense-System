@@ -39,6 +39,11 @@ socket.on('mitigation', (data) => {
     addLog('mitigation', `${data.action}: ${data.description}`);
 });
 
+socket.on('pre_alert', (data) => {
+    const src = data.source_ip ? ` | Source: ${data.source_ip}` : '';
+    addLog('alert', `🔮 Pre-Attack Warning: ${(data.confidence * 100).toFixed(1)}% | ETA: ${data.horizon_sec}s${src}`);
+});
+
 // ─── Single Source of Truth: HTTP Polling ─────────────────
 // Status poll (KPIs + metrics) — every 1s
 setInterval(() => {
@@ -368,6 +373,9 @@ function updateMetrics(data) {
             data.action.replace(/_/g, ' ');
     }
 
+    // Pre-attack prediction
+    updatePreAttackRisk(data.prediction || null);
+
     // Sim time
     if (data.sim_time !== undefined) {
         document.getElementById('sim-time').textContent =
@@ -391,6 +399,42 @@ function updateMetrics(data) {
     } else {
         document.getElementById('system-status').className = 'status-badge';
         document.getElementById('status-text').textContent = 'Monitoring';
+    }
+}
+
+function updatePreAttackRisk(prediction) {
+    const card = document.getElementById('kpi-preattack');
+    const value = document.getElementById('val-preattack');
+    const meta = document.getElementById('val-preattack-meta');
+    const fill = document.getElementById('preattack-fill');
+    if (!card || !value || !meta || !fill) return;
+
+    const confidence = Math.max(0, Math.min(1, Number(prediction?.confidence || 0)));
+    const pct = Math.round(confidence * 100);
+    value.textContent = '';
+    value.appendChild(document.createTextNode(String(pct)));
+    const unitSpan = document.createElement('span');
+    unitSpan.className = 'kpi-unit';
+    unitSpan.textContent = '%';
+    value.appendChild(unitSpan);
+
+    fill.style.width = `${pct}%`;
+
+    card.classList.remove('high-risk', 'medium-risk');
+    if (pct >= 70) {
+        card.classList.add('high-risk');
+    } else if (pct >= 40) {
+        card.classList.add('medium-risk');
+    }
+
+    if (prediction && prediction.predicted) {
+        const eta = prediction.horizon_sec || '?';
+        const src = prediction.source_ip || 'unknown source';
+        meta.textContent = `Likely in ${eta}s | ${src}`;
+    } else if (pct > 0) {
+        meta.textContent = 'Micro-signals detected';
+    } else {
+        meta.textContent = 'No signal';
     }
 }
 

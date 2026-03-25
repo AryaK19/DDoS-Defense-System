@@ -99,6 +99,54 @@ RL_AGENT = {
     ],
 }
 
+# ─── Pre-Attack Prediction (Micro-Pattern EWS) ───────────────────
+PRE_ATTACK_PREDICTOR = {
+    "horizon_sec": 2.0,                   # Recent window used for micro-pattern scan
+    "min_recent_packets": 100,            # Minimum packets required to score risk
+    "min_source_packets": 20,             # Minimum packets per source to evaluate
+    "time_bin_sec": 0.05,                 # Bin size for spike ratio (50ms)
+
+    # Feature scaling references
+    "spike_ratio_scale": 4.0,
+    "timing_irregularity_scale": 3.0,
+    "source_share_scale": 0.35,
+
+    # Source micro-pattern weights (must sum to 1.0)
+    "source_weights": {
+        "spike_ratio": 0.35,
+        "timing_irregularity": 0.35,
+        "source_share": 0.30,
+    },
+
+    # Buffer instability coefficients
+    "buffer_coeff_std_queue": 2.0,
+    "buffer_coeff_std_util": 1.5,
+    "buffer_coeff_mean_util": 0.5,
+    "buffer_min_history": 5,
+
+    # Final blend weights (must sum to 1.0)
+    "blend_weights": {
+        "source_score": 0.45,
+        "buffer_instability": 0.30,
+        "ldos_hint": 0.25,
+    },
+
+    # Temporal smoothing: new = keep*old + update*raw
+    "smoothing_keep": 0.65,
+    "smoothing_update": 0.35,
+
+    # Decision / alert behavior
+    "prediction_threshold": 0.58,
+    "pre_alert_cooldown_sec": 3.0,
+    "score_decay_empty": 0.8,
+    "score_decay_low_data": 0.85,
+
+    # ETA mapping: eta = max(min_eta, min(max_eta, round(max_eta - eta_slope * score)))
+    "eta_min_sec": 3,
+    "eta_max_sec": 10,
+    "eta_slope": 7,
+}
+
 # ─── Simulation ──────────────────────────────────────────────────
 SIMULATION = {
     "tick_interval_ms": 100,          # Simulation tick = 100ms
