@@ -73,8 +73,10 @@ class SimulationEngine:
         # SNAPSHOT: last completed tick's values (read by HTTP handlers)
         # This avoids the race condition where HTTP reads mid-reset zeros
         self._snapshot_throughput = 0.0
+        self._snapshot_throughput_instant = 0.0
         self._snapshot_latency = 20.0
         self._snapshot_loss = 0.0
+        self._snapshot_loss_instant = 0.0
         self._snapshot_time = 0.0
 
         # Rolling window for dashboard display (smooths over burst spikes)
@@ -275,8 +277,10 @@ class SimulationEngine:
             #    even when LDoS bursts only last one tick per period.
             self._recent_losses.append(tick_loss)
             self._recent_throughputs.append(tick_throughput)
+            self._snapshot_throughput_instant = tick_throughput
             self._snapshot_throughput = sum(self._recent_throughputs) / len(self._recent_throughputs)
             self._snapshot_latency = tick_latency
+            self._snapshot_loss_instant = tick_loss
             self._snapshot_loss = sum(self._recent_losses) / len(self._recent_losses)
             self._snapshot_time = self.sim_time
 

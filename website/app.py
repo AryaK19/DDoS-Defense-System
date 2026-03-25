@@ -37,16 +37,29 @@ def init_website(engine):
 def _get_network_health():
     """Get current network health metrics from the simulation."""
     if not simulation_engine:
-        return {"latency_ms": 0, "packet_loss": 0, "throughput_bps": 2_000_000, "status": "healthy"}
+        return {
+            "latency_ms": 0,
+            "packet_loss": 0,
+            "packet_loss_instant": 0,
+            "throughput_bps": 2_000_000,
+            "status": "healthy",
+            "attack_active": False,
+        }
 
     # Read from thread-safe snapshots (not live tick-counters)
     latency = simulation_engine._snapshot_latency
     loss = simulation_engine._snapshot_loss
+    instant_loss = getattr(simulation_engine, "_snapshot_loss_instant", loss)
     throughput = simulation_engine._snapshot_throughput
+    attack_active = simulation_engine.attack_generator.is_active
 
-    if loss > 0.3:
+    # Use an impact score that stays sensitive to LDoS bursts while still
+    # considering smoothed behavior for stability.
+    impact_loss = max(loss, instant_loss)
+
+    if impact_loss > 0.2 or latency > 200:
         status = "critical"
-    elif loss > 0.05:
+    elif impact_loss > 0.03 or latency > 80:
         status = "degraded"
     else:
         status = "healthy"
@@ -54,8 +67,10 @@ def _get_network_health():
     return {
         "latency_ms": latency,
         "packet_loss": loss,
+        "packet_loss_instant": instant_loss,
         "throughput_bps": throughput,
         "status": status,
+        "attack_active": attack_active,
     }
 
 
@@ -66,10 +81,16 @@ def _inject_latency():
     During attack: pages take 1-5 seconds to load.
     """
     health = _get_network_health()
-    loss = health["packet_loss"]
+    loss = max(health["packet_loss"], health.get("packet_loss_instant", 0))
 
     # Simulate request failure based on packet loss
-    if random.random() < loss * 0.8:  # 80% of packet-loss translates to failed requests
+    fail_prob = min(0.95, loss * 1.2)
+    if health.get("status") == "critical":
+        fail_prob = max(fail_prob, 0.35)
+    elif health.get("status") == "degraded":
+        fail_prob = max(fail_prob, 0.08)
+
+    if random.random() < fail_prob:
         return False  # Request "failed"
 
     # Inject latency as a fraction of actual simulated latency

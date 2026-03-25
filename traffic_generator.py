@@ -118,19 +118,29 @@ class LDoSAttackGenerator:
             return []
 
         packets = []
-        elapsed_ms = (current_time - self.start_time) * 1000
+        tick_start_ms = (current_time - self.start_time) * 1000
+        tick_end_ms = tick_start_ms + tick_ms
 
-        # Where are we in the attack period?
-        position_in_period = elapsed_ms % self.period_ms
+        # Compute how much of this tick overlaps the ON (burst) phase.
+        # This prevents missing bursts when tick size (100ms) is larger than
+        # burst length (e.g., 30ms) and phase offsets are not aligned.
+        overlap_ms = 0.0
+        period_start_idx = int(tick_start_ms // self.period_ms)
+        period_end_idx = int(tick_end_ms // self.period_ms)
 
-        # Are we in a burst phase?
-        if position_in_period < self.burst_length_ms:
-            # === BURST PHASE ===
-            # Send at burst_rate_bps to overwhelm the bottleneck
-            burst_bytes_per_tick = (self.burst_rate_bps / 8) * (tick_ms / 1000)
+        for period_idx in range(period_start_idx, period_end_idx + 1):
+            burst_start = period_idx * self.period_ms
+            burst_end = burst_start + self.burst_length_ms
+            seg_start = max(tick_start_ms, burst_start)
+            seg_end = min(tick_end_ms, burst_end)
+            if seg_end > seg_start:
+                overlap_ms += (seg_end - seg_start)
+
+        if overlap_ms > 0:
+            burst_bytes_this_tick = (self.burst_rate_bps / 8) * (overlap_ms / 1000.0)
 
             bytes_sent = 0
-            while bytes_sent < burst_bytes_per_tick:
+            while bytes_sent < burst_bytes_this_tick:
                 self.seq += 1
                 pkt = Packet(
                     src_ip=self.src_ip,
@@ -144,9 +154,7 @@ class LDoSAttackGenerator:
                 packets.append(pkt)
                 bytes_sent += self.packet_size
 
-            if len(packets) > 0:
-                self.pulses_sent += 1
-
+            self.pulses_sent += 1
             self.total_packets += len(packets)
             self.total_bytes += bytes_sent
 
